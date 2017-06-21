@@ -9,9 +9,10 @@ from flask import (
     session,
     flash,
     jsonify)
-from math import ceil
 
 from alayatodo import app, bcrypt
+from alayatodo.entities.todo import Todo
+from alayatodo.orm import user_mapper, todo_mapper
 
 
 @decorator.decorator
@@ -50,11 +51,10 @@ def login_POST():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    sql = "SELECT * FROM users WHERE username = ?"
-    cur = g.db.execute(sql, (username,))
-    user = cur.fetchone()
-    if user and bcrypt.check_password_hash(user[2], password):
-        session['user'] = dict(user)
+    user = user_mapper.get_user_by_username(username)
+
+    if user and bcrypt.check_password_hash(user.password, password):
+        session['user'] = user.__dict__
         session['logged_in'] = True
         return redirect('/todo')
 
@@ -75,18 +75,11 @@ def todo(id):
     user_id = session['user']['id']
     path = request.path
 
-    g.db.row_factory = todo_row_factory
-
-    cur = g.db.execute(
-        "SELECT * FROM todos WHERE id = ? AND user_id = ?",
-        (id, user_id)
-    )
-
-    todo = cur.fetchone()
+    todo = todo_mapper.get_todo_by_id(id, user_id)
 
     if todo:
         if path.endswith('json'):
-            return jsonify(todo)
+            return jsonify(todo.to_json())
         else:
             return render_template('todo.html', todo=todo)
     else:
@@ -111,12 +104,8 @@ def todos():
 
     g.db.row_factory = todo_row_factory
 
-    cur = g.db.execute(
-        "SELECT COUNT(*) FROM todos WHERE user_id = ?",
-        (user_id,)
-    )
+    total_items = todo_mapper.get_number_of_todos_for_user(user_id)
 
-    total_items = cur.fetchone()['COUNT(*)']
     max_page = int(ceil(total_items / float(page_size)))
 
     if page < 1 or page > max_page:
@@ -124,15 +113,10 @@ def todos():
 
     min_item = ((page - 1) * page_size)
 
-    cur = g.db.execute(
-        "SELECT * FROM todos WHERE user_id = ? LIMIT ? OFFSET ?",
-        (user_id, page_size, min_item)
-    )
-
-    todos = cur.fetchall()
+    todos = todo_mapper.get_page_of_todos(user_id, page_size, min_item)
 
     if path.startswith('/todo/json'):
-        return jsonify(todos)
+        return jsonify([td.to_json() for td in todos])
     else:
         return render_template('todos.html', page=page, todos=todos, max_page=max_page, page_size=page_size)
 
@@ -147,12 +131,10 @@ def todos_POST():
         flash('TODO items must have a non-empty description. Please try again.', 'error')
         return redirect('/todo')
 
-    g.db.execute(
-        "INSERT INTO todos (user_id, description) VALUES (?, ?)",
-        (session['user']['id'], request.form.get('description', ''))
-    )
+    user = user_mapper.get_user_by_id(session['user']['id'])
+    todo = Todo(None, user, request.form.get('description', ''), False)
 
-    g.db.commit()
+    todo_mapper.create_todo(todo)
 
     flash('Your TODO has been added.', 'confirmation')
     return redirect('/todo')
@@ -163,14 +145,13 @@ def todos_POST():
 def todo_delete(id):
     user_id = session['user']['id']
 
-    cursor = g.db.execute(
-        "DELETE FROM todos WHERE id = ? AND user_id = ?",
-        (id, user_id))
+    todo = todo_mapper.get_todo_by_id(id, user_id)
 
-    g.db.commit()
+    if todo:
+        row_count = todo_mapper.delete_todo(todo)
 
-    if cursor.rowcount == 1:
-        flash('Your TODO has been deleted.', 'confirmation')
+        if row_count == 1:
+            flash('Your TODO has been deleted.', 'confirmation')
 
     return redirect('/todo')
 
@@ -179,14 +160,11 @@ def todo_delete(id):
 @protected_route
 def todo_toggle_complete(id):
     user_id = session['user']['id']
-
-    completed = not int(request.form.get('completed', ''))
     origin = request.form.get('origin', '/todo')
 
-    g.db.execute(
-        "UPDATE todos SET completed = ? WHERE id = ? AND user_id = ?",
-        (completed, id, user_id)
-    )
-    g.db.commit()
+    todo = todo_mapper.get_todo_by_id(id, user_id)
+    todo.completed = not todo.completed
+
+    todo_mapper.update_completion_status(todo)
 
     return redirect(origin)

@@ -8,7 +8,7 @@
         {% for todo in todos %}
             <tr>
                 <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.id }}</td>
-                <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.user_id }}</td>
+                <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.user.id }}</td>
                 <td>
                     <a class="{% if todo.completed %} strikethrough {% endif %}" href="{{ url_for('todo', id=todo.id) }}">
                        {{ todo.description }}

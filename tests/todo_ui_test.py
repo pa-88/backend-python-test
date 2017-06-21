@@ -118,31 +118,46 @@ class TodoUITest(AbstractTodoTestCase):
         expected_response = [
             {
                 'id': 1,
-                'user_id': 1,
+                'user': {
+                    'id': 1,
+                    'username': 'user1'
+                },
                 'completed': 0,
                 'description': 'Vivamus tempus'
             },
             {
                 'id': 2,
-                'user_id': 1,
+                'user': {
+                    'id': 1,
+                    'username': 'user1'
+                },
                 'completed': 0,
                 'description': 'lorem ac odio'
             },
             {
                 'id': 3,
-                'user_id': 1,
+                'user': {
+                    'id': 1,
+                    'username': 'user1'
+                },
                 'completed': 0,
                 'description': 'Ut congue odio'
             },
             {
                 'id': 4,
-                'user_id': 1,
+                'user': {
+                    'id': 1,
+                    'username': 'user1'
+                },
                 'completed': 0,
                 'description': 'Sodales finibus'
             },
             {
                 'id': 5,
-                'user_id': 1,
+                'user': {
+                    'id': 1,
+                    'username': 'user1'
+                },
                 'completed': 0,
                 'description': 'Accumsan nunc vitae'
             }
@@ -164,7 +179,10 @@ class TodoUITest(AbstractTodoTestCase):
 
         expected_response = {
             'id': 1,
-            'user_id': 1,
+            'user': {
+                'id': 1,
+                'username': 'user1'
+            },
             'completed': 0,
             'description': 'Vivamus tempus'
         }

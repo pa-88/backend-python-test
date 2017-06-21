@@ -7,7 +7,7 @@
         <th>#</th><th>User</th><th>Description</th><th></th><th></th>
         <tr>
             <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.id }}</td>
-            <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.user_id }}</td>
+            <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.user.id }}</td>
             <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.description }}</td>
             <td>
                 <form method="post" action="{{ url_for('todo_toggle_complete', id=todo.id) }}">
