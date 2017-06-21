@@ -131,8 +131,10 @@ def todos_POST():
         "INSERT INTO todos (user_id, description) VALUES (?, ?)",
         (session['user']['id'], request.form.get('description', ''))
     )
+
     g.db.commit()
 
+    flash('Your TODO has been added.', 'confirmation')
     return redirect('/todo')
 
 
@@ -141,10 +143,14 @@ def todos_POST():
 def todo_delete(id):
     user_id = session['user']['id']
 
-    g.db.execute(
+    cursor = g.db.execute(
         "DELETE FROM todos WHERE id = ? AND user_id = ?",
         (id, user_id))
+
     g.db.commit()
+
+    if cursor.rowcount == 1:
+        flash('Your TODO has been deleted.', 'confirmation')
 
     return redirect('/todo')
 

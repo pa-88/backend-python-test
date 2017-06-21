@@ -191,3 +191,42 @@ class TodoUITest(AbstractTodoTestCase):
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(expected_response, data)
+
+    def test_confirmation_is_flashed_on_successful_todo_creation(self):
+        """
+        When a new TODO is created, a confirmation is flashed to the user.
+        """
+
+        self._log_in()
+
+        response = self.app.post('/todo/', data={'description': 'Buy Rice'}, follow_redirects=True)
+
+        self.assertTrue(
+            '<div class="flashed-message">Your TODO has been added.</div>' in response.data
+        )
+
+    def test_confirmation_is_flashed_on_successful_todo_deletion(self):
+        """
+        When a new TODO is created, a confirmation is flashed to the user.
+        """
+
+        self._log_in()
+
+        response = self.app.post('/todo/1', follow_redirects=True)
+
+        self.assertTrue(
+            '<div class="flashed-message">Your TODO has been deleted.</div>' in response.data
+        )
+
+    def test_confirmation_is_not_flashed_on_unsuccessful_deletion(self):
+        """
+        When a deletion fails, such as in the case of a user trying to delete another user's TODO, no flash occurs.
+        """
+
+        self._log_in()
+
+        response = self.app.post('/todo/6', follow_redirects=True)
+
+        self.assertTrue(
+            '<div class="flashed-message">Your TODO has been deleted.</div>' not in response.data
+        )
