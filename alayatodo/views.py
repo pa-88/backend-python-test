@@ -76,8 +76,10 @@ def todos():
 @app.route('/todo/', methods=['POST'])
 @protected_route
 def todos_POST():
-    if not request.form.get('description', ''):
-        flash('TODO items must have a description. Please try again.', 'error')
+    description = request.form.get('description', '').strip()
+
+    if not description:
+        flash('TODO items must have a non-empty description. Please try again.', 'error')
         return redirect('/todo')
 
     g.db.execute(

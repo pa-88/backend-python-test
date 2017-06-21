@@ -15,7 +15,20 @@ class TodoUITest(AbstractTodoTestCase):
         response = self.app.post('/todo/', follow_redirects=True)
 
         self.assertTrue(
-            '<div class="flashed-message">TODO items must have a description. Please try again.</div>' in response.data
+            '<div class="flashed-message">TODO items must have a non-empty description. Please try again.</div>' in response.data
+        )
+
+    def test_todos_post_whitespace_only_description_displays_flash_message(self):
+        """
+        POSTing a TODO with only whitespace in the description generates a flash message.
+        """
+
+        self._log_in()
+
+        response = self.app.post('/todo/', data={'description': '    '}, follow_redirects=True)
+
+        self.assertTrue(
+            '<div class="flashed-message">TODO items must have a non-empty description. Please try again.</div>' in response.data
         )
 
     def test_todos_post_valid_description_displays_in_ui(self):
