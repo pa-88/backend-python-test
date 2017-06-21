@@ -119,3 +119,20 @@ def todo_delete(id):
     g.db.commit()
 
     return redirect('/todo')
+
+
+@app.route('/todo/toggle/<id>', methods=['POST'])
+@protected_route
+def todo_toggle_complete(id):
+    user_id = session['user']['id']
+
+    completed = not int(request.form.get('completed', ''))
+    origin = request.form.get('origin', '/todo')
+
+    g.db.execute(
+        "UPDATE todos SET completed = ? WHERE id = ? AND user_id = ?",
+        (completed, id, user_id)
+    )
+    g.db.commit()
+
+    return redirect(origin)

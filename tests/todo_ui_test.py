@@ -55,7 +55,6 @@ class TodoUITest(AbstractTodoTestCase):
         soup = BeautifulSoup(response.data, 'html.parser')
         table_data = soup.find_all('td')
 
-        self.assertEqual(len(table_data), 4)
         self.assertEqual(table_data[2].string, 'lorem ac odio')
 
     def test_todos_get_properly_displays_all_items_in_ui(self):

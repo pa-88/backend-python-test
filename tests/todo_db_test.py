@@ -24,7 +24,7 @@ class TodoDBTest(AbstractTodoTestCase):
             row = cur.fetchone()
             cur.close()
 
-        self.assertEqual(row, (9, 1, 'Buy Apples'))
+        self.assertEqual(row, (9, 1, 'Buy Apples', 0))
 
     def test_todos_delete_properly_deletes_a_valid_todo(self):
         """
@@ -61,3 +61,53 @@ class TodoDBTest(AbstractTodoTestCase):
             cur.close()
 
         self.assertIsNotNone(row)
+
+    def test_uncompleted_task_is_toggled_to_completed(self):
+        """
+        Toggling the checkbox on an incomplete task will show it as completed.
+        """
+
+        self._log_in()
+
+        with sqlite3.connect(alayatodo.app.config['DATABASE']) as db:
+            db.execute(
+                'UPDATE todos SET completed = 0 WHERE id = 1'
+            )
+
+            db.commit()
+
+            self.app.post('/todo/toggle/1', data={'completed': '0', 'origin': '/todo'}, follow_redirects=True)
+
+            cur = db.execute(
+                'SELECT * FROM todos WHERE id = 1'
+            )
+
+            row = cur.fetchone()
+            cur.close()
+
+        self.assertEquals(row[3], 1)
+
+    def test_completed_task_is_toggled_to_incomplete(self):
+        """
+        Toggling the checkbox on an completed task will show it as incomplete.
+        """
+
+        self._log_in()
+
+        with sqlite3.connect(alayatodo.app.config['DATABASE']) as db:
+            db.execute(
+                'UPDATE todos SET completed = 1 WHERE id = 1'
+            )
+
+            db.commit()
+
+            self.app.post('/todo/toggle/1', data={'completed': '1', 'origin': '/todo'}, follow_redirects=True)
+
+            cur = db.execute(
+                'SELECT * FROM todos WHERE id = 1'
+            )
+
+            row = cur.fetchone()
+            cur.close()
+
+        self.assertEquals(row[3], 0)

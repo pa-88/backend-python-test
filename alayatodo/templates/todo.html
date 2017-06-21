@@ -4,11 +4,24 @@
 <div class="col-md-4 col-md-offset-4">
     <h1>Todo:</h1>
     <table class="table table-striped">
-        <th>#</th><th>User</th><th>Description</th><th></th>
+        <th>#</th><th>User</th><th>Description</th><th></th><th></th>
         <tr>
-            <td>{{ todo.id }}</td>
-            <td>{{ todo.user_id }}</td>
-            <td>{{ todo.description }}</td>
+            <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.id }}</td>
+            <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.user_id }}</td>
+            <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.description }}</td>
+            <td>
+                <form method="post" action="{{ url_for('todo_toggle_complete', id=todo.id) }}">
+                    <button type="submit" class="btn btn-xs">
+                    {% if todo.completed %}
+                        <span class="glyphicon glyphicon-check glyphicon-white glyphicons"></span>
+                    {% else %}
+                        <span class="glyphicon glyphicon-unchecked glyphicon-white glyphicons"></span>
+                    {% endif %}
+                    </button>
+                    <input type="hidden" value="{{ todo.completed }}" name="completed" />
+                    <input type="hidden" value="{{ url_for('todo', id=todo.id) }}" name="origin" />
+                </form>
+            </td>
             <td>
                 <form method="post" action="{{ url_for('todo_delete', id=todo.id) }}">
                     <button type="submit" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove glyphicon-white"></span></button>

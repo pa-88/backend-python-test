@@ -6,6 +6,7 @@ from abc import ABCMeta
 import sqlite3
 
 import alayatodo
+from resources import password_hash_data_migration
 
 
 class AbstractTodoTestCase(unittest.TestCase):
@@ -25,7 +26,8 @@ class AbstractTodoTestCase(unittest.TestCase):
     def _build_database():
         scripts = [
             '../resources/database.sql',
-            '../resources/fixtures.sql'
+            '../resources/fixtures.sql',
+            '../resources/add_completed_field.sql'
         ]
 
         with sqlite3.connect(alayatodo.app.config['DATABASE']) as db:
@@ -33,6 +35,8 @@ class AbstractTodoTestCase(unittest.TestCase):
                 with open(script) as f:
                     sql_script = f.read()
                     db.executescript(sql_script)
+
+        password_hash_data_migration.main()
 
     def _log_in(self):
         with self.app.session_transaction() as session:

@@ -4,26 +4,41 @@
 <div class="col-md-4 col-md-offset-4">
     <h1>Todo List:</h1>
     <table class="table table-striped">
-        <th>#</th><th>User</th><th>Description</th><th></th>
+        <th>#</th><th>User</th><th>Description</th><th></th><th></th>
         {% for todo in todos %}
             <tr>
-                <td>{{ todo.id }}</td>
-                <td>{{ todo.user_id }}</td>
+                <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.id }}</td>
+                <td class="{% if todo.completed %} strikethrough {% endif %}">{{ todo.user_id }}</td>
                 <td>
-                    <a href="{{ url_for('todo', id=todo.id) }}">
+                    <a class="{% if todo.completed %} strikethrough {% endif %}" href="{{ url_for('todo', id=todo.id) }}">
                        {{ todo.description }}
                     </a>
                 </td>
                 <td>
+                    <form method="post" action="{{ url_for('todo_toggle_complete', id=todo.id) }}">
+                        <button type="submit" class="btn btn-xs">
+                        {% if todo.completed %}
+                            <span class="glyphicon glyphicon-check glyphicon-white glyphicons"></span>
+                        {% else %}
+                            <span class="glyphicon glyphicon-unchecked glyphicon-white glyphicons"></span>
+                        {% endif %}
+                        </button>
+                        <input type="hidden" value="{{ todo.completed }}" name="completed" />
+                        <input type="hidden" value="{{ url_for('todos') }}" name="origin" />
+                    </form>
+                </td>
+                <td>
                     <form method="post" action="{{ url_for('todo_delete', id=todo.id) }}">
-                        <button type="submit" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove glyphicon-white"></span></button>
+                        <button type="submit" class="btn btn-xs btn-danger">
+                            <span class="glyphicon glyphicon-remove glyphicon-white"></span>
+                        </button>
                     </form>
                 </td>
             </tr>
         {% endfor %}
         <tr>
             <form method="post" action="{{ url_for('todos_POST') }}">
-                <td colspan="3">
+                <td colspan="4">
                     <input type="textbox" name="description" class="small-6 small-center" placeholder="Description...">
                 </td>
                 <td>
