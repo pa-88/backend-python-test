@@ -1,4 +1,4 @@
-from alayatodo import app, bcrypt
+import decorator
 from flask import (
     g,
     redirect,
@@ -7,6 +7,17 @@ from flask import (
     session,
     flash
 )
+
+from alayatodo import app, bcrypt
+
+
+@decorator.decorator
+def protected_route(fn, *args):
+    if not session.get('logged_in'):
+        return redirect('/login')
+    else:
+        # * explodes the tuple.
+        return fn(*args)
 
 
 @app.route('/')
@@ -45,6 +56,7 @@ def logout():
 
 
 @app.route('/todo/<id>', methods=['GET'])
+@protected_route
 def todo(id):
     cur = g.db.execute("SELECT * FROM todos WHERE id = ?", (id,))
     todo = cur.fetchone()
@@ -53,9 +65,8 @@ def todo(id):
 
 @app.route('/todo', methods=['GET'])
 @app.route('/todo/', methods=['GET'])
+@protected_route
 def todos():
-    if not session.get('logged_in'):
-        return redirect('/login')
     cur = g.db.execute("SELECT * FROM todos")
     todos = cur.fetchall()
     return render_template('todos.html', todos=todos)
@@ -63,10 +74,8 @@ def todos():
 
 @app.route('/todo', methods=['POST'])
 @app.route('/todo/', methods=['POST'])
+@protected_route
 def todos_POST():
-    if not session.get('logged_in'):
-        return redirect('/login')
-
     if not request.form.get('description', ''):
         flash('TODO items must have a description. Please try again.', 'error')
         return redirect('/todo')
@@ -81,10 +90,8 @@ def todos_POST():
 
 
 @app.route('/todo/<id>', methods=['POST'])
+@protected_route
 def todo_delete(id):
-    if not session.get('logged_in'):
-        return redirect('/login')
-
     g.db.execute("DELETE FROM todos WHERE id = ?", (id,))
     g.db.commit()
     return redirect('/todo')

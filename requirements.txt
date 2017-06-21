@@ -3,3 +3,4 @@ Jinja2
 docopt
 beautifulsoup4
 flask-bcrypt
+decorator
