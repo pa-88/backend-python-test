@@ -35,9 +35,10 @@
     {% for message in get_flashed_messages() %}
       <div class="bs-example bs-example-standalone" data-example-id=dismissible-alert-js>
         <div class="alert alert-warning alert-dismissible fade in" role=alert>
-          <button type=button class=close data-dismiss=alert aria-label=Close
-          ><span aria-hidden=true>&times;</span></button>
-          {{ message }}
+          <button type=button class=close data-dismiss=alert aria-label=Close>
+              <span aria-hidden=true>&times;</span>
+          </button>
+            <div class="flashed-message">{{ message }}</div>
         </div>
     {% endfor %}
 

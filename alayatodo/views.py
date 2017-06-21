@@ -4,8 +4,9 @@ from flask import (
     redirect,
     render_template,
     request,
-    session
-    )
+    session,
+    flash
+)
 
 
 @app.route('/')
@@ -65,6 +66,11 @@ def todos():
 def todos_POST():
     if not session.get('logged_in'):
         return redirect('/login')
+
+    if not request.form.get('description', ''):
+        flash('TODO items must have a description. Please try again.', 'error')
+        return redirect('/todo')
+
     g.db.execute(
         "INSERT INTO todos (user_id, description) VALUES ('%s', '%s')"
         % (session['user']['id'], request.form.get('description', ''))
