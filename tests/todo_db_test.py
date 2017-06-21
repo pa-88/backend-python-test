@@ -44,3 +44,20 @@ class TodoDBTest(AbstractTodoTestCase):
             cur.close()
 
         self.assertIsNone(row)
+
+    def test_user_cannot_delete_another_users_todo(self):
+        """
+        A user cannot delete another user's TODO.
+        """
+
+        self._log_in()
+
+        with sqlite3.connect(alayatodo.app.config['DATABASE']) as db:
+            cur = db.execute(
+                'SELECT * FROM todos WHERE id = 6'
+            )
+
+            row = cur.fetchone()
+            cur.close()
+
+        self.assertIsNotNone(row)

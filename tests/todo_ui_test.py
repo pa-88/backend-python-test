@@ -68,10 +68,7 @@ class TodoUITest(AbstractTodoTestCase):
             'lorem ac odio',
             'Ut congue odio',
             'Sodales finibus',
-            'Accumsan nunc vitae',
-            'Lorem ipsum',
-            'In lacinia est',
-            'Odio varius gravida'
+            'Accumsan nunc vitae'
         ]
 
         self._log_in()
@@ -95,3 +92,17 @@ class TodoUITest(AbstractTodoTestCase):
         response = self.app.post('/todo/1', follow_redirects=True)
 
         self.assertTrue('Vivamus tempus' not in response.data)
+
+    def test_user_cannot_view_another_users_todo(self):
+        """
+        GETting todo/<id> for a TODO which belongs to another user will results in a flash
+        message indicating that the user cannot view it.
+        """
+
+        self._log_in()
+
+        response = self.app.get('/todo/6', follow_redirects=True)
+
+        self.assertTrue(
+            '<div class="flashed-message">You may only view TODOs which belong to you.</div>' in response.data
+        )

@@ -58,16 +58,33 @@ def logout():
 @app.route('/todo/<id>', methods=['GET'])
 @protected_route
 def todo(id):
-    cur = g.db.execute("SELECT * FROM todos WHERE id = ?", (id,))
+    user_id = session['user']['id']
+
+    cur = g.db.execute(
+        "SELECT * FROM todos WHERE id = ? AND user_id = ?",
+        (id, user_id)
+    )
+
     todo = cur.fetchone()
-    return render_template('todo.html', todo=todo)
+
+    if todo:
+        return render_template('todo.html', todo=todo)
+    else:
+        flash('You may only view TODOs which belong to you.', 'error')
+        return redirect('/todo')
 
 
 @app.route('/todo', methods=['GET'])
 @app.route('/todo/', methods=['GET'])
 @protected_route
 def todos():
-    cur = g.db.execute("SELECT * FROM todos")
+    user_id = session['user']['id']
+
+    cur = g.db.execute(
+        "SELECT * FROM todos WHERE user_id = ?",
+        (user_id,)
+    )
+
     todos = cur.fetchall()
     return render_template('todos.html', todos=todos)
 
@@ -94,6 +111,11 @@ def todos_POST():
 @app.route('/todo/<id>', methods=['POST'])
 @protected_route
 def todo_delete(id):
-    g.db.execute("DELETE FROM todos WHERE id = ?", (id,))
+    user_id = session['user']['id']
+
+    g.db.execute(
+        "DELETE FROM todos WHERE id = ? AND user_id = ?",
+        (id, user_id))
     g.db.commit()
+
     return redirect('/todo')
