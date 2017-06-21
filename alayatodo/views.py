@@ -5,8 +5,8 @@ from flask import (
     render_template,
     request,
     session,
-    flash
-)
+    flash,
+    jsonify)
 
 from alayatodo import app, bcrypt
 
@@ -18,6 +18,16 @@ def protected_route(fn, *args):
     else:
         # * explodes the tuple.
         return fn(*args)
+
+
+def todo_row_factory(cursor, row):
+    result = {}
+
+    for i, col in enumerate(cursor.description):
+        # col is a 6tuple where the first field is the column name.
+        result[col[0]] = row[i]
+
+    return result
 
 
 @app.route('/')
@@ -56,9 +66,13 @@ def logout():
 
 
 @app.route('/todo/<id>', methods=['GET'])
+@app.route('/todo/<id>/json', methods=['GET'])
 @protected_route
 def todo(id):
     user_id = session['user']['id']
+    path = request.path
+
+    g.db.row_factory = todo_row_factory
 
     cur = g.db.execute(
         "SELECT * FROM todos WHERE id = ? AND user_id = ?",
@@ -68,17 +82,27 @@ def todo(id):
     todo = cur.fetchone()
 
     if todo:
-        return render_template('todo.html', todo=todo)
+        if path.endswith('json'):
+            return jsonify(todo)
+        else:
+            return render_template('todo.html', todo=todo)
     else:
-        flash('You may only view TODOs which belong to you.', 'error')
-        return redirect('/todo')
+        if path.endswith('json'):
+            return jsonify({})
+        else:
+            flash('You may only view TODOs which belong to you.', 'error')
+            return redirect('/todo')
 
 
 @app.route('/todo', methods=['GET'])
 @app.route('/todo/', methods=['GET'])
+@app.route('/todo/json', methods=['GET'])
 @protected_route
 def todos():
     user_id = session['user']['id']
+    path = request.path
+
+    g.db.row_factory = todo_row_factory
 
     cur = g.db.execute(
         "SELECT * FROM todos WHERE user_id = ?",
@@ -86,7 +110,11 @@ def todos():
     )
 
     todos = cur.fetchall()
-    return render_template('todos.html', todos=todos)
+
+    if path == '/todo/json':
+        return jsonify(todos)
+    else:
+        return render_template('todos.html', todos=todos)
 
 
 @app.route('/todo', methods=['POST'])

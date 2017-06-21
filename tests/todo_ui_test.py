@@ -1,3 +1,5 @@
+import json
+
 from bs4 import BeautifulSoup
 
 from tests.abstract_todo_test_case import AbstractTodoTestCase
@@ -105,3 +107,87 @@ class TodoUITest(AbstractTodoTestCase):
         self.assertTrue(
             '<div class="flashed-message">You may only view TODOs which belong to you.</div>' in response.data
         )
+
+    def test_user_can_request_all_todos_as_json(self):
+        """
+        The user can request the entire todo collection as JSON.
+        """
+
+        self._log_in()
+
+        expected_response = [
+            {
+                'id': 1,
+                'user_id': 1,
+                'completed': 0,
+                'description': 'Vivamus tempus'
+            },
+            {
+                'id': 2,
+                'user_id': 1,
+                'completed': 0,
+                'description': 'lorem ac odio'
+            },
+            {
+                'id': 3,
+                'user_id': 1,
+                'completed': 0,
+                'description': 'Ut congue odio'
+            },
+            {
+                'id': 4,
+                'user_id': 1,
+                'completed': 0,
+                'description': 'Sodales finibus'
+            },
+            {
+                'id': 5,
+                'user_id': 1,
+                'completed': 0,
+                'description': 'Accumsan nunc vitae'
+            }
+        ]
+
+        response = self.app.get('/todo/json', follow_redirects=True)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(expected_response, data)
+
+    def test_user_can_request_a_single_todo_as_json(self):
+        """
+        The user can request a todo as JSON.
+        """
+
+        self._log_in()
+
+        expected_response = {
+            'id': 1,
+            'user_id': 1,
+            'completed': 0,
+            'description': 'Vivamus tempus'
+        }
+
+        response = self.app.get('/todo/1/json', follow_redirects=True)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(expected_response, data)
+
+    def test_requesting_an_invalid_todo_as_json_returns_empty_object(self):
+        """
+        When requesting an invalid todo as json, an empty object is returned.
+        """
+
+        self._log_in()
+
+        expected_response = {}
+
+        response = self.app.get('/todo/100/json', follow_redirects=True)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(expected_response, data)
