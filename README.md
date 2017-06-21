@@ -36,6 +36,14 @@ bin/python main.py initdb
 bin/python main.py
 ```
 
+### Running Tests
+
+In order to run the tests, go to the tests directory and run:
+
+    $ nosetests
+    
+Note that this requires nose to be installed which is a dependency in `requirements.txt`
+
 ### Instructions
 
 You will be asked to improve the code of this app with the following tasks.

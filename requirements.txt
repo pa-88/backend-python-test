@@ -4,3 +4,4 @@ docopt
 beautifulsoup4
 flask-bcrypt
 decorator
+nose
