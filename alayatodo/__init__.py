@@ -4,6 +4,8 @@ import os
 import tempfile
 
 # configuration
+from flask_bcrypt import Bcrypt
+
 DATABASE = os.path.join(tempfile.gettempdir(), 'alayatodo.db')
 DEBUG = True
 SECRET_KEY = 'development key'
@@ -13,6 +15,9 @@ PASSWORD = 'default'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+# For password hashing/salting.
+bcrypt = Bcrypt()
 
 
 def connect_db():

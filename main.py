@@ -7,6 +7,7 @@ Usage:
 from docopt import docopt
 import subprocess
 import os
+from resources import password_hash_data_migration
 
 from alayatodo import app
 
@@ -28,6 +29,7 @@ if __name__ == '__main__':
     if args['initdb']:
         _run_sql('resources/database.sql')
         _run_sql('resources/fixtures.sql')
+        password_hash_data_migration.main()
         print "AlayaTodo: Database initialized."
     else:
         app.run(use_reloader=True)

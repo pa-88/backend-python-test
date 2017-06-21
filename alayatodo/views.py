@@ -1,4 +1,4 @@
-from alayatodo import app
+from alayatodo import app, bcrypt
 from flask import (
     g,
     redirect,
@@ -26,10 +26,10 @@ def login_POST():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    sql = "SELECT * FROM users WHERE username = ? AND password = ?"
-    cur = g.db.execute(sql, (username, password))
+    sql = "SELECT * FROM users WHERE username = ?"
+    cur = g.db.execute(sql, (username,))
     user = cur.fetchone()
-    if user:
+    if user and bcrypt.check_password_hash(user[2], password):
         session['user'] = dict(user)
         session['logged_in'] = True
         return redirect('/todo')

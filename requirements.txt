@@ -2,3 +2,4 @@ Flask
 Jinja2
 docopt
 beautifulsoup4
+flask-bcrypt
