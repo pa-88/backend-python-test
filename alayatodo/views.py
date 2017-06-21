@@ -1,3 +1,5 @@
+from math import ceil
+
 import decorator
 from flask import (
     g,
@@ -7,6 +9,7 @@ from flask import (
     session,
     flash,
     jsonify)
+from math import ceil
 
 from alayatodo import app, bcrypt
 
@@ -65,8 +68,8 @@ def logout():
     return redirect('/')
 
 
-@app.route('/todo/<id>', methods=['GET'])
 @app.route('/todo/<id>/json', methods=['GET'])
+@app.route('/todo/<id>', methods=['GET'])
 @protected_route
 def todo(id):
     user_id = session['user']['id']
@@ -94,27 +97,44 @@ def todo(id):
             return redirect('/todo')
 
 
-@app.route('/todo', methods=['GET'])
-@app.route('/todo/', methods=['GET'])
+@app.route('/todo/json/', methods=['GET'])
 @app.route('/todo/json', methods=['GET'])
+@app.route('/todo/', methods=['GET'])
+@app.route('/todo', methods=['GET'])
 @protected_route
 def todos():
     user_id = session['user']['id']
     path = request.path
 
+    page = int(request.args.get('page', 1))
+    page_size = int(request.args.get('page_size', 10))
+
     g.db.row_factory = todo_row_factory
 
     cur = g.db.execute(
-        "SELECT * FROM todos WHERE user_id = ?",
+        "SELECT COUNT(*) FROM todos WHERE user_id = ?",
         (user_id,)
+    )
+
+    total_items = cur.fetchone()['COUNT(*)']
+    max_page = int(ceil(total_items / float(page_size)))
+
+    if page < 1 or page > max_page:
+        page = 1
+
+    min_item = ((page - 1) * page_size)
+
+    cur = g.db.execute(
+        "SELECT * FROM todos WHERE user_id = ? LIMIT ? OFFSET ?",
+        (user_id, page_size, min_item)
     )
 
     todos = cur.fetchall()
 
-    if path == '/todo/json':
+    if path.startswith('/todo/json'):
         return jsonify(todos)
     else:
-        return render_template('todos.html', todos=todos)
+        return render_template('todos.html', page=page, todos=todos, max_page=max_page, page_size=page_size)
 
 
 @app.route('/todo', methods=['POST'])

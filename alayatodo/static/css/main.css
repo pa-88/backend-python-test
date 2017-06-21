@@ -13,3 +13,11 @@ body {
 .strikethrough {
     text-decoration: line-through;
 }
+
+#pageLeft {
+    float: left;
+}
+
+#pageRight {
+    float: right;
+}

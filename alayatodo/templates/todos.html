@@ -46,6 +46,32 @@
                 </td>
             </form>
         </tr>
+        <tr>
+            <td colspan="2">
+                <form method="get" action="{{ url_for('todos') }}">
+                    <button class="btn btn-primary"
+                            {% if page == 1 %} disabled="disabled" {% endif %}
+                            type="submit" id="pageLeft" type="submit" class="btn btn-xs">
+                        <span class="glyphicons glyphicons-circle-arrow-left">prev</span>
+                    </button>
+                    <input type="hidden" name="page" value="{{ page - 1 }}" />
+                    <input type="hidden" name="page_size" value="{{ page_size }}" />
+                </form>
+            </td>
+            <td colspan="2"></td>
+            <td colspan="2">
+                <form method="get" action="{{ url_for('todos') }}">
+                    <button class="btn btn-primary"
+                            {% if page == max_page %} disabled="disabled" {% endif %}
+                            type="submit" id="pageRight" type="submit" class="btn btn-xs">
+                        <span class="glyphicons glyphicons-circle-arrow-right">next</span>
+                    </button>
+                    <input type="hidden" name="page" value="{{ page + 1 }}" />
+                    <input type="hidden" name="page_size" value="{{ page_size }}" />
+                </form>
+            </td>
+        </tr>
     </table>
+
 </div>
 {% endblock %}
